@@ -1,0 +1,28 @@
+{
+  "name": "jarvis-react",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "3.4.1",
+    "react-simple-chatbot": "^0.6.1",
+    "styled-components": "^5.1.1",
+    "web-vitals": "^0.2.2"
+  },
+  "scripts": {
+    "start": "react-scripts start"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
