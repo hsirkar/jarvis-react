@@ -4,8 +4,9 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.9.1",
     "react": "^16.13.1",
-    "react-chat-elements": "^10.9.2",
+    "react-anchorme": "^2.0.0",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "socket.io-client": "^2.3.0",
