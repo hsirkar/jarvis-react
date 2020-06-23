@@ -4,6 +4,7 @@ import openSocket from 'socket.io-client';
 import ChatFeed from './ChatFeed';
 import { Send } from '@material-ui/icons';
 import AwesomeTable from './AwesomeTable';
+import Terminal from './Terminal';
 
 const socket = openSocket('http://localhost:3000');
 
@@ -20,22 +21,25 @@ const styles = {
         height: '100%',
         flex: 1,
         maxHeight: '100%',
-        overflow: 'auto'
+        justifyContent: 'flex-end',
+        overflow: 'hidden'
+    },
+    right: {
+        background: '#2C292D'
     },
     top: {
         flex: 1,
-        padding: 15,
         paddingBottom: 0,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
         overflow: 'hidden'
     },
-    
     bottom: {
         flex: 0,
         padding: 15,
-        display: 'flex'
+        display: 'flex',
+        paddingTop: 0
     },
     form: {
         display: 'flex',
@@ -73,22 +77,34 @@ class App extends React.Component {
             systemMessages: [],
             inputValue: '',
             status: '',
-            details: {}
+            details: {},
+            logMessages: []
         };
-        socket.on('connect', () => this.setState({ status: 'connected' }));
-        socket.on('disconnect', () => this.setState({ status: 'not connected' }));
-        socket.on('received', () => this.setState({ status: 'thinking' }));
+        socket.on('connect', () => this.setState({ status: 'Ready' }));
+        socket.on('disconnect', () => this.setState({ status: 'Disconnected' }));
+        socket.on('received', () => this.setState({ status: 'Seen' }));
         socket.on('message', message => {
-            const obj = { sender: 'Jarvis', time: new Date(), ...message };
-            this.setState({ status: 'connected', messages: this.state.messages.concat(obj), details: obj });
+            const obj = { sender: 'Jarvis', time: new Date(), subtitle: message.source ? 'via ' + message.source : '', ...message };
+            obj.text = obj.text;
+            const newState = { messages: this.state.messages.concat(obj), details: obj }
+
+            if(obj.type === 'response' || obj.type === 'question') {
+                newState.status = 'Ready';
+            }
+
+            this.setState(newState);
+
             console.log(JSON.stringify(obj));
+        });
+        socket.on('log', message => {
+            this.setState({ logMessages: this.state.logMessages.concat(message) });
         });
     }
     handleSubmit = e => {
         const { messages, inputValue } = this.state;
 
         const obj = { text: inputValue, sender: 'User', time: new Date() };
-        this.setState({ status: 'sending', inputValue: '', messages: messages.concat(obj) });
+        this.setState({ status: 'Sending...', inputValue: '', messages: messages.concat(obj) });
         
         socket.emit('message', inputValue);
 
@@ -98,7 +114,7 @@ class App extends React.Component {
         console.log(prevState);
     }
     render() {
-        const { messages, inputValue } = this.state;
+        const { messages, inputValue, status } = this.state;
         const { handleSubmit } = this;
         return (
             <div style={styles.main}>
@@ -106,7 +122,9 @@ class App extends React.Component {
                     <div style={styles.top}>
                         <ChatFeed
                             messages={messages}
-                            onClick={message => this.setState({ detail: message })} />
+                            onClick={message => this.setState({ details: message })}
+                            status={status}
+                            typing={status === 'Seen'} />
                     </div>
                     <div style={styles.bottom}>
                         <form onSubmit={handleSubmit} style={styles.form}>
@@ -122,9 +140,10 @@ class App extends React.Component {
                         </form>
                     </div>
                 </Paper>
-                <Paper style={styles.left}>
-                    <div>
-                        <AwesomeTable data={this.state.details} showTypes></AwesomeTable>
+                <Paper style={{ ...styles.left, ...styles.right }}>
+                    <div style={styles.top}>
+                        {/* <AwesomeTable data={this.state.details} showTypes></AwesomeTable> */}
+                        <Terminal messages={this.state.logMessages}></Terminal>
                     </div>
                 </Paper>
             </div>

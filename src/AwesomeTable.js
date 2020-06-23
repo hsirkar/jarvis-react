@@ -17,7 +17,8 @@ const styles = {
         marginButtom: '3px',
         marginTop: '3px',
         fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-        tableLayout: 'auto'
+        tableLayout: 'auto',
+        lineHeight: '140%'
     },
     td: {
         border: '1px solid #ddd',
@@ -61,7 +62,9 @@ class AwesomeTable extends React.Component {
                     {item ?
                         <div>
                             {color && color[0] && <span style={{ ...styles.colorPreview, backgroundColor: color[0] }} />}
-                            <Anchorme>{item instanceof Date ? item.toLocaleString('en-US') : item.toString()}</Anchorme>
+                            {item instanceof Date ?
+                                item.toLocaleString('en-US') :
+                                item.toString().split('\n').map(line => <span><Anchorme>{line}</Anchorme><br/></span>)}
                         </div> :
                         <span style={styles.propType} component="span">(null)</span>}
                 </div> :
