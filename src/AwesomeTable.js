@@ -10,19 +10,24 @@ const toType = obj => {
 }
 
 const styles = {
+    wrapper: {
+        overflow: 'auto',
+        minHeight: '100%',
+        backgroundColor: 'white'
+    },
     table: {
         borderCollapse: 'collapse',
         width: '100%',
         fontSize: '13px',
         marginButtom: '3px',
-        marginTop: '3px',
+        // marginTop: '3px',
         fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
         tableLayout: 'auto',
         lineHeight: '140%'
     },
     td: {
         border: '1px solid #ddd',
-        padding: '8px',
+        padding: '5px',
     },
     propType: {
         color: 'gray',
@@ -56,15 +61,17 @@ class AwesomeTable extends React.Component {
 
         let color = item && item.toString().match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
 
+        console.log(item);
+
         return (
             isPrimitive(item) ?
                 <div style={{ padding: '5px', ...styles.value }}>
-                    {item ?
+                    {item !== null ?
                         <div>
-                            {color && color[0] && <span style={{ ...styles.colorPreview, backgroundColor: color[0] }} />}
+                            {(color && color[0]) ? <span style={{ ...styles.colorPreview, backgroundColor: color[0] }} /> : ''}
                             {item instanceof Date ?
                                 item.toLocaleString('en-US') :
-                                item.toString().split('\n').map(line => <span><Anchorme>{line}</Anchorme><br/></span>)}
+                                item.toString().split('\n').map(line => <span key={line}>{<Anchorme>{line}</Anchorme>}<br/></span>)}
                         </div> :
                         <span style={styles.propType} component="span">(null)</span>}
                 </div> :
@@ -82,10 +89,11 @@ class AwesomeTable extends React.Component {
         }
 
         return (
+            <div style={styles.wrapper}>
             <table style={styles.table}>
                 <tbody>
                     {data && Object.keys(data).map((prop, index) =>
-                        <tr style={{ backgroundColor: this.getBackgroundColor(index, level, 0) }}>
+                        <tr key={index} style={{ backgroundColor: this.getBackgroundColor(index, level, 0) }}>
                             {/* Left column */}
                             <td style={{ ...styles.td, fontWeight: '500', width: '6%', minWidth: '130px', backgroundColor: this.getBackgroundColor(index, level, 1) }}>
                                 <span style={styles.prop} component="span">{prop} </span>
@@ -107,6 +115,7 @@ class AwesomeTable extends React.Component {
                     )}
                 </tbody>
             </table>
+            </div>
         );
     }
 }

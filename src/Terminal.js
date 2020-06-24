@@ -1,6 +1,6 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
-import dots from './three-dots.svg';
+import { Anchorme } from 'react-anchorme';
+import './terminal.css';
 
 const styles = {
     chatbubble: {
@@ -14,7 +14,7 @@ const styles = {
         paddingBottom: 15,
         fontFamily: 'Ubuntu Mono, monospace',
         background: '#2C292D',
-        color: '#bbb',
+        color: '#ddd',
         wordWrap: 'break-word'
     },
     wrapper: {
@@ -33,18 +33,20 @@ class Terminal extends React.Component {
     }
     render() {
         const { messages } = this.props;
-        console.log(messages);
         return(
             <>
                 <div style={styles.chatHistory}>
                     {messages.map(m =>
-                        <div style={styles.wrapper}>
-                            <div
+                        <div style={styles.wrapper} key={m}>
+                            {/* <Anchorme> */}
+                                {m.replace(/ /g, '\u00A0').split('\n').map(line => <div key={line}><Anchorme>{line}</Anchorme></div>)}
+                            {/* </Anchorme> */}
+                            {/* <div
                                 style={{ ...styles.chatbubble }}
                                 dangerouslySetInnerHTML={{ __html: m.replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;') }}>
 
-                                {/* {m.split('\n').map(l => <span>{l}<br/></span>)} */}
-                            </div>
+                                {/* {m.split('\n').map(l => <span>{l}<br/></span>)}
+                            </div> */}
                         </div>
                     )}
                     <div ref={this.terminalEndRef} />

@@ -57,13 +57,17 @@ class ChatFeed extends React.Component {
             <>
                 <div style={styles.chatHistory}>
                     {messages.map(m =>
-                        <div style={styles.wrapper}>
+                        <div key={m.sender + m.time.toString()} style={styles.wrapper}>
+                            {m.image && 
+                                <div style={{ width: 128, height: 128 }}>
+                                    <img alt="" style={{ textAlign: 'center', borderRadius: 20 }} src={m.image} width={128} />
+                                </div>}
                             <div
                                 onClick={() => onClick(m)}
                                 style={{ ...styles.chatbubble, ...(m.sender === 'User' ? styles.rightchat : styles.leftchat) }}>
-                                {m.fullText ? m.fullText.split('\n').map(item => <span>{item}<br/></span>) :
-                                m.text ? m.text.split('\n').map(item => <span>{item}<br/></span>) : '👍'}
-                                <small style={{ fontSize: '0.7em', marginTop: 0, display: 'block', color: 'gray' }}>{m.subtitle}</small>
+                                {m.fullText ? m.fullText.split('\n').map(item => <span key={item}>{item}<br/></span>) :
+                                m.text ? m.text.split('\n').map(item => <span key={item}>{item}<br/></span>) : '👍'}
+                                <small style={{ fontSize: '0.7em', marginTop: 0, display: 'block', color: 'gray' }}>{m.source ? 'via ' + m.source : ''}</small>
                             </div>
                         </div>
                     )}

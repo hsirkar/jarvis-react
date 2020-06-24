@@ -2,11 +2,16 @@ import React from 'react';
 import { Paper, TextField, IconButton } from '@material-ui/core';
 import openSocket from 'socket.io-client';
 import ChatFeed from './ChatFeed';
-import { Send } from '@material-ui/icons';
+import { Send, Mic, Stop } from '@material-ui/icons';
 import AwesomeTable from './AwesomeTable';
 import Terminal from './Terminal';
 
 const socket = openSocket('http://localhost:3000');
+const SpeechRecognition = window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.continuous = true;
+recognition.interimResults = true;
+recognition.lang = 'en-US';
 
 const styles = {
     main: {
@@ -48,26 +53,6 @@ const styles = {
     },
 };
 
-const theme = {
-    scheme: 'monokai',
-    author: 'wimer hazenberg (http://www.monokai.nl)',
-    base00: '#272822',
-    base01: '#383830',
-    base02: '#49483e',
-    base03: '#75715e',
-    base04: '#a59f85',
-    base05: '#f8f8f2',
-    base06: '#f5f4f1',
-    base07: '#f9f8f5',
-    base08: '#f92672',
-    base09: '#fd971f',
-    base0A: '#f4bf75',
-    base0B: '#a6e22e',
-    base0C: '#a1efe4',
-    base0D: '#66d9ef',
-    base0E: '#ae81ff',
-    base0F: '#cc6633'
-  };
 
 class App extends React.Component {
     constructor(props) {
@@ -78,14 +63,16 @@ class App extends React.Component {
             inputValue: '',
             status: '',
             details: {},
-            logMessages: []
+            logMessages: [],
+            recognizing: false
         };
+    }
+    componentDidMount() {
         socket.on('connect', () => this.setState({ status: 'Ready' }));
         socket.on('disconnect', () => this.setState({ status: 'Disconnected' }));
         socket.on('received', () => this.setState({ status: 'Seen' }));
         socket.on('message', message => {
-            const obj = { sender: 'Jarvis', time: new Date(), subtitle: message.source ? 'via ' + message.source : '', ...message };
-            obj.text = obj.text;
+            const obj = { sender: 'Jarvis', time: new Date(), ...message };
             const newState = { messages: this.state.messages.concat(obj), details: obj }
 
             if(obj.type === 'response' || obj.type === 'question') {
@@ -93,12 +80,36 @@ class App extends React.Component {
             }
 
             this.setState(newState);
-
-            console.log(JSON.stringify(obj));
         });
         socket.on('log', message => {
             this.setState({ logMessages: this.state.logMessages.concat(message) });
         });
+        recognition.onstart = () => {
+            this.setState({ recognizing: true });
+        }
+        recognition.onend = () => {
+            this.setState({ recognizing: false });
+            this.handleSubmit();
+        }
+        recognition.onresult = event => {
+            let interimTranscript = '';
+            let isFinal = false;
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const res = event.results[i];
+
+                if (res.isFinal) {
+                    this.setState({ inputValue: res[0].transcript });
+                    isFinal = true;
+                    recognition.stop();
+                } else {
+                    interimTranscript += res[0].transcript;
+                }
+            }
+
+            if (!isFinal)
+                this.setState({ inputValue: interimTranscript });
+        }
     }
     handleSubmit = e => {
         const { messages, inputValue } = this.state;
@@ -108,14 +119,18 @@ class App extends React.Component {
         
         socket.emit('message', inputValue);
 
-        e.preventDefault();
+        e && e.preventDefault();
     }
-    componentDidUpdate(prevProps, prevState) {
-        console.log(prevState);
+    handleToggleRecognition = () => {
+        const { recognizing } = this.state;
+
+        if(recognizing)
+            recognition.stop();
+        else
+            recognition.start();
     }
     render() {
-        const { messages, inputValue, status } = this.state;
-        const { handleSubmit } = this;
+        const { messages, inputValue, status, recognizing } = this.state;
         return (
             <div style={styles.main}>
                 <Paper style={styles.left}>
@@ -127,13 +142,18 @@ class App extends React.Component {
                             typing={status === 'Seen'} />
                     </div>
                     <div style={styles.bottom}>
-                        <form onSubmit={handleSubmit} style={styles.form}>
+                        <form onSubmit={this.handleSubmit} style={styles.form}>
                             <TextField
                                 fullWidth
                                 value={inputValue}
                                 onChange={event => this.setState({ inputValue: event.target.value })} />
                             <IconButton
-                                type='submit'
+                                onClick={this.handleToggleRecognition}
+                                style={{ marginLeft: 10 }}
+                                color="primary"
+                                variant="contained">{recognizing ? <Stop /> : <Mic />}</IconButton>
+                            <IconButton
+                                type="submit"
                                 style={{ marginLeft: 10 }}
                                 color="primary"
                                 variant="contained"><Send /></IconButton>
