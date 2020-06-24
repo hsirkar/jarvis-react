@@ -2130,6 +2130,11 @@
     "@svgr/plugin-svgo" "^4.3.1"
     loader-utils "^1.2.3"
 
+"@tensorflow-models/speech-commands@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@tensorflow-models/speech-commands/-/speech-commands-0.4.2.tgz#30da01114aba9253ba0871eedc1fbe03c1306aca"
+  integrity sha512-XpfRUzVy0DtQkMvR/jqRWCFgcka9pgwEdfqtHTqnIBoueAUJiuq1edD+RNzbK01O3bAJ9FIL/VuiTZmxNx92NQ==
+
 "@types/babel__core@^7.1.0":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.2.tgz#608c74f55928033fce18b99b213c16be4b3d114f"

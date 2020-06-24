@@ -46,16 +46,18 @@ const styles = {
 class ChatFeed extends React.Component {
     constructor(props){
         super(props);
-        this.messagesEndRef = React.createRef();
+        this.messagesEnd = React.createRef();
+        this.chatHistory = React.createRef();
     }
     componentDidUpdate() {
-        this.messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        this.messagesEnd.current.scrollIntoView({ behavior: 'smooth' });
+        this.chatHistory.current.scrollTop = this.chatHistory.current.scrollHeight;
     }
     render() {
         const { messages, onClick, status, typing } = this.props;
         return(
             <>
-                <div style={styles.chatHistory}>
+                <div style={styles.chatHistory} ref={this.chatHistory}>
                     {messages.map(m =>
                         <div key={m.sender + m.time.toString()} style={styles.wrapper}>
                             {m.image && 
@@ -78,7 +80,7 @@ class ChatFeed extends React.Component {
                             </div>
                         </div>
                     }
-                    <div ref={this.messagesEndRef} />
+                    <div style={{ float:"left", clear: "both" }} ref={this.messagesEnd} />
                 </div>
                 <Typography variant="caption" style={{ marginRight: 20, textAlign: 'right' }}>{status}</Typography>
             </>

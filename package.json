@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
+    "@tensorflow-models/speech-commands": "^0.4.2",
     "react": "^16.13.1",
     "react-anchorme": "^2.0.0",
     "react-dom": "^16.13.1",

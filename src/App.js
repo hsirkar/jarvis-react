@@ -5,10 +5,13 @@ import ChatFeed from './ChatFeed';
 import { Send, Mic, Stop } from '@material-ui/icons';
 import AwesomeTable from './AwesomeTable';
 import Terminal from './Terminal';
+import wakeword from './wakeword';
 
 const socket = openSocket('http://localhost:3000');
 const SpeechRecognition = window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
+const beep = new Audio('http://localhost:3006/beep.mp3');
+
 recognition.continuous = true;
 recognition.interimResults = true;
 recognition.lang = 'en-US';
@@ -49,7 +52,7 @@ const styles = {
     form: {
         display: 'flex',
         flex: 1,
-        marginBottom: -15
+        marginBottom: 0
     },
 };
 
@@ -67,7 +70,7 @@ class App extends React.Component {
             recognizing: false
         };
     }
-    componentDidMount() {
+    async componentDidMount() {
         socket.on('connect', () => this.setState({ status: 'Ready' }));
         socket.on('disconnect', () => this.setState({ status: 'Disconnected' }));
         socket.on('received', () => this.setState({ status: 'Seen' }));
@@ -85,11 +88,15 @@ class App extends React.Component {
             this.setState({ logMessages: this.state.logMessages.concat(message) });
         });
         recognition.onstart = () => {
+            beep.play();
             this.setState({ recognizing: true });
         }
         recognition.onend = () => {
+            beep.play();
             this.setState({ recognizing: false });
             this.handleSubmit();
+            if(wakeword.recognizer && !wakeword.recognizer.isListening())
+                wakeword.listen(() => this.state.recognizing || recognition.start());
         }
         recognition.onresult = event => {
             let interimTranscript = '';
@@ -110,14 +117,17 @@ class App extends React.Component {
             if (!isFinal)
                 this.setState({ inputValue: interimTranscript });
         }
+        await wakeword.init();
+        wakeword.listen(() => this.state.recognizing || recognition.start());
     }
     handleSubmit = e => {
         const { messages, inputValue } = this.state;
 
-        const obj = { text: inputValue, sender: 'User', time: new Date() };
-        this.setState({ status: 'Sending...', inputValue: '', messages: messages.concat(obj) });
-        
-        socket.emit('message', inputValue);
+        if(inputValue.trim() !== '') {
+            const obj = { text: inputValue, sender: 'User', time: new Date() };
+            this.setState({ status: 'Sending...', inputValue: '', messages: messages.concat(obj) });
+            socket.emit('message', inputValue);
+        }
 
         e && e.preventDefault();
     }
@@ -146,7 +156,9 @@ class App extends React.Component {
                             <TextField
                                 fullWidth
                                 value={inputValue}
-                                onChange={event => this.setState({ inputValue: event.target.value })} />
+                                onChange={event => this.setState({ inputValue: event.target.value })}
+                                variant="outlined"
+                                disabled={recognizing} />
                             <IconButton
                                 onClick={this.handleToggleRecognition}
                                 style={{ marginLeft: 10 }}
