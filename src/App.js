@@ -1,70 +1,31 @@
 import React from 'react';
-import { Paper, TextField, IconButton } from '@material-ui/core';
-import openSocket from 'socket.io-client';
-import ChatFeed from './ChatFeed';
-import { Send, Mic, Stop } from '@material-ui/icons';
-import AwesomeTable from './AwesomeTable';
-import Terminal from './Terminal';
+import { ThemeProvider, CssBaseline, IconButton, CircularProgress } from '@material-ui/core';
+import { BsMic, BsStop, BsExclamationCircle } from 'react-icons/bs';
+import { FiLoader, FiEye, FiCheck  } from 'react-icons/fi';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import Background from './components/Background';
+import ChatFeed from './components/ChatFeed';
+import theme from './theme';
+import './index.css';
+import socketIO from 'socket.io-client';
 import wakeword from './wakeword';
+import { uncensor } from './util';
 
-const socket = openSocket('http://localhost:3000');
-const SpeechRecognition = window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
+const socket = socketIO('http://localhost:3000');
+const recognition = window.webkitSpeechRecognition ? new window.webkitSpeechRecognition() : {};
 const beep = new Audio('http://localhost:3006/beep.mp3');
 
 recognition.continuous = true;
 recognition.interimResults = true;
 recognition.lang = 'en-US';
 
-const styles = {
-    main: {
-        display: 'flex',
-        flexDirection: 'row',
-        height: '100%',
-        fontFamily: 'Roboto'
-    },
-    left: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        flex: 1,
-        maxHeight: '100%',
-        justifyContent: 'flex-end',
-        overflow: 'hidden'
-    },
-    right: {
-        background: '#2C292D'
-    },
-    top: {
-        flex: 1,
-        paddingBottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        overflow: 'hidden'
-    },
-    bottom: {
-        flex: 0,
-        padding: 15,
-        display: 'flex',
-        paddingTop: 0
-    },
-    form: {
-        display: 'flex',
-        flex: 1,
-        marginBottom: 0
-    },
-};
-
-
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             messages: [],
-            systemMessages: [],
             inputValue: '',
-            status: '',
+            status: 'Disconnected',
             details: {},
             logMessages: [],
             recognizing: false
@@ -83,6 +44,7 @@ class App extends React.Component {
             }
 
             this.setState(newState);
+            this.forceUpdate();
         });
         socket.on('log', message => {
             this.setState({ logMessages: this.state.logMessages.concat(message) });
@@ -90,13 +52,15 @@ class App extends React.Component {
         recognition.onstart = () => {
             beep.play();
             this.setState({ recognizing: true });
+            socket.emit('recognitionStart');
         }
         recognition.onend = () => {
             beep.play();
             this.setState({ recognizing: false });
-            this.handleSubmit();
+            this.submit();
             if(wakeword.recognizer && !wakeword.recognizer.isListening())
                 wakeword.listen(() => this.state.recognizing || recognition.start());
+            socket.emit('recognitionEnd');
         }
         recognition.onresult = event => {
             let interimTranscript = '';
@@ -106,7 +70,7 @@ class App extends React.Component {
                 const res = event.results[i];
 
                 if (res.isFinal) {
-                    this.setState({ inputValue: res[0].transcript });
+                    this.setState({ inputValue: uncensor(res[0].transcript) });
                     isFinal = true;
                     recognition.stop();
                 } else {
@@ -115,12 +79,17 @@ class App extends React.Component {
             }
 
             if (!isFinal)
-                this.setState({ inputValue: interimTranscript });
+                this.setState({ inputValue: uncensor(interimTranscript) });
         }
         await wakeword.init();
         wakeword.listen(() => this.state.recognizing || recognition.start());
     }
-    handleSubmit = e => {
+    componentDidUpdate(_, prevState) {
+        if(prevState.messages !== this.state.messages) {
+            this.forceUpdate();
+        }
+    }
+    submit = event => {
         const { messages, inputValue } = this.state;
 
         if(inputValue.trim() !== '') {
@@ -129,9 +98,9 @@ class App extends React.Component {
             socket.emit('message', inputValue);
         }
 
-        e && e.preventDefault();
+        event && event.preventDefault();
     }
-    handleToggleRecognition = () => {
+    toggleRecognition = () => {
         const { recognizing } = this.state;
 
         if(recognizing)
@@ -140,84 +109,49 @@ class App extends React.Component {
             recognition.start();
     }
     render() {
-        const { messages, inputValue, status, recognizing } = this.state;
+        const { state, submit, toggleRecognition } = this;
+        const { inputValue, status, recognizing } = state;
         return (
-            <div style={styles.main}>
-                <Paper style={styles.left}>
-                    <div style={styles.top}>
+            <div className="container">
+                <div className="container horizontal">
+                    <div className="top">
                         <ChatFeed
-                            messages={messages}
-                            onClick={message => this.setState({ details: message })}
-                            status={status}
+                            messages={status === 'Seen' ? state.messages.concat({ type: 'typing', sender: 'Jarvis' }) : state.messages}
+                            onClick={()=>{}}
                             typing={status === 'Seen'} />
                     </div>
-                    <div style={styles.bottom}>
-                        <form onSubmit={this.handleSubmit} style={styles.form}>
-                            <TextField
-                                fullWidth
+                    <div className="bottom">
+                        <form onSubmit={submit}>
+                            <IconButton
+                                onClick={toggleRecognition}
+                                className={`iconbutton` + (this.state.recognizing ? ' pulse' : '')}
+                                color="inherit"
+                                variant="contained">{recognizing ? <BsStop /> : <BsMic />}</IconButton>
+                            <input
+                                placeholder="Say &quot;Jarvis&quot; or type something..."
                                 value={inputValue}
                                 onChange={event => this.setState({ inputValue: event.target.value })}
                                 variant="outlined"
                                 disabled={recognizing} />
-                            <IconButton
-                                onClick={this.handleToggleRecognition}
-                                style={{ marginLeft: 10 }}
-                                color="primary"
-                                variant="contained">{recognizing ? <Stop /> : <Mic />}</IconButton>
-                            <IconButton
-                                type="submit"
-                                style={{ marginLeft: 10 }}
-                                color="primary"
-                                variant="contained"><Send /></IconButton>
                         </form>
                     </div>
-                </Paper>
-                <Paper style={{ ...styles.left, ...styles.right }}>
-                    <div style={styles.top}>
-                        {/* <AwesomeTable data={this.state.details} showTypes></AwesomeTable> */}
-                        <Terminal messages={this.state.logMessages}></Terminal>
+                    <div className="status">
+                        {this.state.status === 'Sending...' && <AiOutlineLoading3Quarters className="spin" />}
+                        {this.state.status === 'Ready' && <FiCheck />}
+                        {this.state.status === 'Disconnected' && <BsExclamationCircle />}
+                        {this.state.status === 'Seen' && <FiEye />}
+                        {this.state.status}
                     </div>
-                </Paper>
+                </div>
             </div>
         );
     }
 }
 
-const App2 = () => <AwesomeTable data={JSON.parse(`{
-	"items":
-		{
-			"item":
-				[
-					{
-						"id": "0001",
-						"type": "donut",
-						"name": "Cake",
-						"ppu": 0.55,
-						"batters":
-							{
-								"batter":
-									[
-										{ "id": "1001", "type": "Regular" },
-										{ "id": "1002", "type": "Chocolate" },
-										{ "id": "1003", "type": "Blueberry" },
-										{ "id": "1004", "type": "Devil's Food" }
-									]
-							},
-						"topping":
-							[
-								{ "id": "5001", "type": "None" },
-								{ "id": "5002", "type": "Glazed" },
-								{ "id": "5005", "type": "Sugar" },
-								{ "id": "5007", "type": "Powdered Sugar" },
-								{ "id": "5006", "type": "Chocolate with Sprinkles" },
-								{ "id": "5003", "type": "Chocolate" },
-								{ "id": "5004", "type": "Maple" }
-							]
-					}
-				]
-		}
-}
-`)} showTypes />
-
-
-export default App;
+export default () => (
+    <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Background />
+        <App />
+    </ThemeProvider>
+);

@@ -1,7 +1,7 @@
 {
     "tfjsSpeechCommandsVersion": "0.4.0",
     "modelName": "TMv2",
-    "timeStamp": "2020-06-24T18:13:30.863Z",
+    "timeStamp": "2020-06-25T00:03:15.401Z",
     "wordLabels": [
         "jarvis",
         "_background_noise_"

@@ -1,0 +1,9 @@
+{
+    "short_name": "Jarvis Client",
+    "name": "Jarvis React Client",
+    "icons": [],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#fff",
+    "background_color": "#05182d"
+}

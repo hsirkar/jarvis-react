@@ -1,33 +1,36 @@
 {
-  "name": "jarvis-react",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@material-ui/core": "^4.10.2",
-    "@material-ui/icons": "^4.9.1",
-    "@tensorflow-models/speech-commands": "^0.4.2",
-    "react": "^16.13.1",
-    "react-anchorme": "^2.0.0",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
-    "socket.io-client": "^2.3.0",
-    "styled-components": "^5.1.1",
-    "three-dots": "^0.2.0",
-    "web-vitals": "^0.2.2"
-  },
-  "scripts": {
-    "start": "set PORT=3006 && react-scripts start"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+    "name": "jarvis-react",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@material-ui/core": "^4.10.2",
+        "@material-ui/icons": "^4.9.1",
+        "@tensorflow-models/speech-commands": "^0.4.2",
+        "@tensorflow/tfjs": "^2.0.1",
+        "react": "^16.13.1",
+        "react-anchorme": "^2.0.0",
+        "react-dom": "^16.13.1",
+        "react-icons": "^3.10.0",
+        "react-scripts": "3.4.1",
+        "react-virtualized": "^9.21.2",
+        "socket.io-client": "^2.3.0",
+        "styled-components": "^5.1.1",
+        "three-dots": "^0.2.0",
+        "web-vitals": "^0.2.2"
+    },
+    "scripts": {
+        "start": "set PORT=3006 && react-scripts start"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
 }

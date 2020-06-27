@@ -30,7 +30,8 @@ const wakeword = {
             console.log(`${labels[index]} (${highScore})`)
             if (labels[index] === 'jarvis' && highScore >= 0.9) {
                 callback(recognizer);
-                recognizer.stopListening();
+                if(recognizer.isListening())
+                    recognizer.stopListening();
             }
         }, {
             includeSpectrogram: true,
