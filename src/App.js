@@ -11,7 +11,7 @@ import socketIO from 'socket.io-client';
 import wakeword from './wakeword';
 import { uncensor } from './util';
 
-const socket = socketIO('http://localhost:3000');
+const socket = socketIO('http://192.168.1.7:3000');
 const recognition = window.webkitSpeechRecognition ? new window.webkitSpeechRecognition() : {};
 const beep = new Audio('http://localhost:3006/beep.mp3');
 
@@ -131,6 +131,14 @@ class App extends React.Component {
                                 placeholder="Say &quot;Jarvis&quot; or type something..."
                                 value={inputValue}
                                 onChange={event => this.setState({ inputValue: event.target.value })}
+                                onKeyDown={event => {
+                                    if(event.keyCode === 38) {
+                                        if(state.messages.length)
+                                            this.setState({
+                                                inputValue: state.messages.slice().reverse().find(m=>m.sender==='User').text
+                                            });
+                                    }
+                                }}
                                 variant="outlined"
                                 disabled={recognizing} />
                         </form>

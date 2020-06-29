@@ -55,21 +55,16 @@ html, body, div#root {
     margin-bottom: 20px;
     margin-left: 14px;
     margin-right: 14px;
-    max-width: 500px;
+    max-width: 600px;
     cursor: default;
 }
-.chatbubble .image-div {
-    height: 128px;
-    min-width: 128px;
-    margin-bottom: 15px;
-    /* background: gray; */
-}
-.chatbubble .image-div img {
+.chatbubble img.image {
     text-align: center;
     border-radius: 4px;
-    /* margin-left: 14px; */
     height: 128px;
     width: auto;
+    display: block;
+    margin-bottom: 10px;
 }
 *:focus {
     outline: 0;
@@ -140,4 +135,53 @@ html, body, div#root {
     to {
         transform:rotate(360deg);
     }
+}
+.subtitle {
+    display: block;
+    font-size: 0.7em;
+    margin-top: 2px;
+    line-height: 160%;
+    font-weight: 400;
+}
+.subtitle a, .subtitle a:visited {
+    color: inherit;
+}
+.subtitle a:not(:first-child) {
+    margin-left: 5px;
+}
+.subtitle a:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+.small {
+    color: rgba(255,255,255,0.6);
+    fill: rgba(255,255,255,0.6) !important;
+    stroke: rgba(255,255,255,0.6) !important;
+}
+.small svg {
+    stroke: currentColor;
+}
+.list-element {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.list-element:first-child {
+    padding-top: 0;
+}
+.list-element:last-child{
+    padding-bottom: 0;
+}
+.list-element img {
+    width: auto !important;
+    height: auto !important;
+    margin-top: 0.05em;
+    margin-right: 0.4em;
+    float: left;
+    max-width: 128px;
+    max-height: 128px;
+}
+.list-element {
+    font-size: 0.9em;
+}
+.list-element .subtitle {
+    font-size: 0.8em;
 }
