@@ -30,6 +30,7 @@ html, body, div#root {
 .bottom {
     flex: 0;
     padding: 20px;
+    padding-top: 15px;
 }
 .bottom form {
     display: flex;
@@ -57,6 +58,7 @@ html, body, div#root {
     margin-right: 14px;
     max-width: 600px;
     cursor: default;
+    /* position: relative; */
 }
 .chatbubble img.image {
     text-align: center;
@@ -138,10 +140,11 @@ html, body, div#root {
 }
 .subtitle {
     display: block;
-    font-size: 0.7em;
+    font-size: 0.75em;
     margin-top: 2px;
     line-height: 160%;
     font-weight: 400;
+    color: rgba(255,255,255,0.8);
 }
 .subtitle a, .subtitle a:visited {
     color: inherit;
@@ -153,19 +156,34 @@ html, body, div#root {
     color: rgba(255, 255, 255, 0.6);
 }
 .small {
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.5);
     fill: rgba(255,255,255,0.6) !important;
     stroke: rgba(255,255,255,0.6) !important;
 }
+.small a {
+    /* display: block; */
+    float: right;
+    /* margin-bottom: 1em; */
+    /* padding-left: 1em; */
+    padding: 0.4em;
+    position: relative;
+    bottom: 1.85em;
+}
 .small svg {
     stroke: currentColor;
+}
+.list-title { 
+    padding-bottom: 5px;
+    border-bottom: 2px solid rgba(255,255,255,0.6);
+    /* font-size: 1.1em; */
+    font-weight: 900;
 }
 .list-element {
     padding-top: 10px;
     padding-bottom: 10px;
 }
 .list-element:first-child {
-    padding-top: 0;
+    /* padding-top: 0; */
 }
 .list-element:last-child{
     padding-bottom: 0;
@@ -184,4 +202,15 @@ html, body, div#root {
 }
 .list-element .subtitle {
     font-size: 0.8em;
+}
+div.gallery-wrapper {
+    width: 60vmax;
+    height: 370px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+div.image-container {
+    display: block;
+    height: 128px;
+    margin-bottom: 10px;
 }

@@ -159,7 +159,7 @@ class App extends React.Component {
 export default () => (
     <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Background />
+        {/* <Background /> */}
         <App />
     </ThemeProvider>
 );

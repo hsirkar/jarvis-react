@@ -1,10 +1,11 @@
 import React from 'react';
 import { AutoSizer, List, CellMeasurerCache, CellMeasurer } from 'react-virtualized';
-import { FiThumbsUp, FiInfo } from 'react-icons/fi';
+import { FiThumbsUp } from 'react-icons/fi';
 import { FaExternalLinkAlt, } from 'react-icons/fa';
+import Gallery from 'react-grid-gallery';
 
 // Convert "\n" to line breaks
-const br = text => text && text.split('\n').map((item, i) => <span key={item}>{i===0 || <br/>}{item}</span>);
+const br = text => text && text.split('\n').map((item, i) => <span key={i}>{i===0 || <br/>}{item}</span>);
 
 class ChatFeed extends React.Component {
     constructor(props) {
@@ -24,8 +25,8 @@ class ChatFeed extends React.Component {
         } else if (prevMessages.length && messages[messages.length - 1] !== prevMessages[prevMessages.length - 1]) {
             this.cache.clear(messages.length - 1, 0);
             this.list.current.scrollToRow(this.props.messages.length);
-            setTimeout(() => this.list.current.scrollToRow(this.props.messages.length), 100);
-            setTimeout(() => this.list.current.scrollToRow(this.props.messages.length), 600);
+            setTimeout(() => this.list.current && this.list.current.scrollToRow(this.props.messages.length), 100);
+            setTimeout(() => this.list.current && this.list.current.scrollToRow(this.props.messages.length), 600);
         }
     }
     renderRow = ({ index, key, style, parent }) => {
@@ -34,6 +35,8 @@ class ChatFeed extends React.Component {
 
         if(m.source && !m.subtitle)
             m.subtitle = 'via ' + m.source;
+
+        let isList = !!(m.list && Array.isArray(m.list) && m.list.length);
 
         return (
             <CellMeasurer
@@ -49,24 +52,55 @@ class ChatFeed extends React.Component {
                             className={`chatbubble ${m.sender.toLowerCase()}`}>
                             {m.type === 'typing' ? <img src={require('./dots.svg')} /> : (
                                 <div>
-                                    {(m.list && Array.isArray(m.list) && m.list.length) ?
-                                        <div>
-                                            {m.list.map((el,i) => 
-                                            <div key={i} className="list-element">
-                                                {el.image && <img className="image" onLoad={measure} alt="" src={el.image} width={128} />}
-                                                {el.displayText && br(el.displayText.toString())}
-                                                <div className="subtitle">{br(el.subtitle)}</div>
-                                                <div className="subtitle small">
-                                                    {br(el.subtitle2)}
-                                                    {el.url && <a target="_blank" rel="noopener noreferrer" href={el.url}><FaExternalLinkAlt /></a>}
-                                                </div>
-                                            </div>)}
-                                        </div> :
-                                        <div>
-                                            {m.image && <img className="image" onLoad={measure} alt="" src={m.image} width={128} />}
-                                            {m.displayText ? br(m.displayText.toString()) : m.text ? br(m.text.toString()) : <FiThumbsUp size="1.3em" />}
-                                        </div>
+                                    {/* Render image */}
+                                    {m.image &&
+                                        <div className="image-container">
+                                        <Gallery
+                                            rowHeight={128}
+                                            enableImageSelection={false}
+                                            images={[{
+                                                src: m.image,
+                                                thumbnail: m.image,
+                                                thumbnailHeight: 100 }]} />
+                                            </div>
                                     }
+
+                                    {/* Render list title / display text / main text */}
+                                    {m.listTitle ?
+                                        <div className="list-title">{m.listTitle}</div> :
+                                        (m.displayText ? br(m.displayText.toString()) : m.text ? br(m.text.toString()) : <FiThumbsUp size="1.3em" />)}
+
+                                    {/* Render list */}
+                                    {isList &&
+                                        (m.isGallery ?
+                                                <div className="gallery-wrapper">
+                                                <Gallery
+                                                    rowHeight={180}
+                                                    enableImageSelection={false}
+                                                    images={m.list.map(item => ({
+                                                        src: item.image,
+                                                        thumbnail: item.image,
+                                                        thumbnailHeight: 180,
+                                                        caption: item.displayText || item.text
+                                                     }))}
+                                                    />
+                                                </div>
+                                            :
+                                            <div>
+                                                {m.list.map((el, i) =>
+                                                    <div key={i} className="list-element">
+                                                        {el.image && <img className="image" onLoad={measure} alt="" src={el.image} width={128} />}
+                                                        {el.displayText && br(el.displayText.toString())}
+                                                        <div className="subtitle">{br(el.subtitle)}</div>
+                                                        <div className="subtitle small">
+                                                            {br(el.subtitle2)}
+                                                            {el.url && <a target="_blank" rel="noopener noreferrer" href={el.url}><FaExternalLinkAlt /></a>}
+                                                        </div>
+                                                    </div>)}
+                                            </div>
+                                        )}
+
+                                    {/* Render subtitle, subtitle2, and link */}
                                     <div className="subtitle">{br(m.subtitle)}</div>
                                     <div className="subtitle small">
                                         {br(m.subtitle2)}
@@ -82,7 +116,7 @@ class ChatFeed extends React.Component {
     }
     render() {
         const { props, cache, list, renderRow } = this;
-        const { messages, onClick, typing } = props;
+        const { messages } = props;
         const totalHeight = messages.map((_,i)=>cache.getHeight(i,0)).reduce((t,c)=>t+c, 0);
 
         return (
