@@ -22,7 +22,7 @@ class ChatFeed extends React.Component {
 
         if (messages.length !== prevMessages.length) {
             this.list.current.scrollToRow(this.props.messages.length);
-        } else if (prevMessages.length && messages[messages.length - 1] !== prevMessages[prevMessages.length - 1]) {
+        } else if (prevMessages !== messages) {
             this.cache.clear(messages.length - 1, 0);
             this.list.current.scrollToRow(this.props.messages.length);
             setTimeout(() => this.list.current && this.list.current.scrollToRow(this.props.messages.length), 100);
@@ -64,6 +64,9 @@ class ChatFeed extends React.Component {
                                                 thumbnailHeight: 100 }]} />
                                             </div>
                                     }
+                                    
+                                    {/* Render video */}
+                                    {m.video && <video type="video/mp4" src={m.video} autoPlay={false} preload="false" controls={true} />}
 
                                     {/* Render list title / display text / main text */}
                                     {m.listTitle ?

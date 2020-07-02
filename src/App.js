@@ -1,7 +1,7 @@
 import React from 'react';
-import { ThemeProvider, CssBaseline, IconButton, CircularProgress } from '@material-ui/core';
+import { ThemeProvider, CssBaseline, IconButton } from '@material-ui/core';
 import { BsMic, BsStop, BsExclamationCircle } from 'react-icons/bs';
-import { FiLoader, FiEye, FiCheck  } from 'react-icons/fi';
+import { FiEye, FiCheck  } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import Background from './components/Background';
 import ChatFeed from './components/ChatFeed';
@@ -44,6 +44,21 @@ class App extends React.Component {
             }
 
             this.setState(newState);
+            this.forceUpdate();
+        });
+        socket.on('update', update => {
+            if(!update.ref) return;
+
+            let messages = [...this.state.messages];
+            let index = messages.findIndex(m => m.ref === update.ref);
+
+            if(index === -1) return;
+
+            let message = {...messages[index]};
+            Object.assign(message, update);
+            messages[index] = message;
+
+            this.setState({ messages });
             this.forceUpdate();
         });
         socket.on('log', message => {
